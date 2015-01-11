@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: dna/formulas/OrganizeNode.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: dna/formulas/OrganizeNode.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/**
+ * @file dna-sequence-process
+ * @namespace dna
+ * @licence GNU GPL v3
+ * @copyright Copyright (c) 2014.
+ * Created by samuel on 18/06/14.
+ */
+
+//(function (window, dna) {
+
+/**
+ * @global
+ * @param {Matrix} _matrix
+ * @constructor
+ */
+window.dna.OrganizeNode = function (_matrix) {
+
+    /**
+     *
+     * @type {Connected|Window.dna.Connected|*}
+     */
+    var Connected = window.dna.Connected;
+
+    /**
+     *
+     * @type {window.dna.Matrix}
+     */
+    this.matrix = _matrix;
+    /**
+     *
+     * @type {Array}
+     */
+    this.controllers = [];
+
+    /**
+     *
+     * @param nodeController
+     */
+    this.addNodeController = function (nodeController) {
+        this.controllers[this.getValuePosController(nodeController)] = nodeController;
+    };
+
+    /**
+     *
+     * @param node
+     */
+    this.execute = function (node) {
+        if (this.controllers[this.getValuePosController(node)]) {
+            this.executeController(this.controllers[this.getValuePosController(node)]);
+        }
+    };
+
+    /**
+     *
+     * @param node
+     */
+    this.executeController = function (node) {
+        for (var c in Connected) {
+            var nodeFound = this.searchNode(node, c);
+            if (nodeFound !== null) {
+                node.setNodeController(c, nodeFound);
+                node.setNode(c, nodeFound.getNode());
+            }
+        }
+
+        node.setSequenceNode("A", this.getValuesSequence("A", node));
+        node.setSequenceNode("B", this.getValuesSequence("B", node));
+
+    };
+
+    /**
+     *
+     * @param value
+     * @param nodeController
+     * @returns {String}
+     */
+    this.getValuesSequence = function (value, nodeController) {
+        if (value === "A") {
+            if (nodeController.positionA === 0) {
+                return "";
+            }
+
+            return this.sequenceA[nodeController.positionA - 1];
+        } else if (value === "B") {
+            if (nodeController.positionB === 0) {
+                return "";
+            }
+
+            return this.sequenceB[nodeController.positionB - 1];
+        }
+
+        return "";
+    };
+
+    /**
+     *
+     * @param node
+     * @param value
+     * @returns {window.dna.NodeController}
+     */
+    this.searchNode = function (node, value) {
+        var posA = node.positionA;
+        var posB = node.positionB;
+        var nodes = this.matrix.nodes;
+
+        try {
+
+            switch (value) {
+                case Connected.N:
+                    posB -= 1;
+                    break;
+                case Connected.S:
+                    posB += 1;
+                    break;
+                case Connected.W:
+                    posA -= 1;
+                    break;
+                case Connected.E:
+                    posA += 1;
+                    break;
+                case Connected.NW:
+                    posA -= 1;
+                    posB -= 1;
+                    break;
+                case Connected.NE:
+                    posA += 1;
+                    posB -= 1;
+                    break;
+                case Connected.SW:
+                    posA -= 1;
+                    posB += 1;
+                    break;
+                case Connected.SE:
+                    posA += 1;
+                    posB += 1;
+                    break;
+            }
+
+//                    if (posA &lt; 0 || posB &lt; 0 || this.sequenceB.length &lt; posB || this.sequenceA.length &lt; posA) {
+//
+//                        return null;
+//                    }
+
+            var nodeFound;
+
+            try {
+                nodeFound = nodes[posA][posB];
+            } catch (e) {
+            }
+
+            if (nodeFound) {
+                return this.controllers[this.getValuePosController(nodeFound)];
+            }
+            return null;
+        } catch (exception) {
+            //TODO
+            console.log(exception);
+        }
+        return null;
+    };
+
+    /**
+     *
+     * @param nodeController
+     * @returns {string}
+     */
+    this.getValuePosController = function (nodeController) {
+        if (nodeController) {
+            if (nodeController.positionA !== undefined) {
+                return nodeController.positionA + "-" + nodeController.positionB;
+            }
+            if (nodeController.x !== undefined) {
+                return nodeController.x + "-" + nodeController.y;
+            }
+        }
+    };
+};
+
+/**
+ *
+ * @type {{addNode: addNode, organize: organize, matrix: *, sequenceA: *, sequenceB: *, getController: getController}}
+ */
+window.dna.OrganizeNode.prototype = {
+    /**
+     *
+     * @param node
+     * @param positionA
+     * @param positionB
+     */
+    addNode: function (node, positionA, positionB) {
+        this.addNodeController(new window.dna.NodeController(node, positionA, positionB));
+    },
+
+    /**
+     * @description organize
+     */
+    organize: function () {
+
+        var nodes = this.matrix.nodes;
+        var i;
+        var j;
+        for (i = 0; i &lt; nodes.length; i++) {
+            for (j = 0; j &lt; nodes[i].length; j++) {
+                this.addNode(nodes[i][j], i, j);
+            }
+        }
+        for (i = 0; i &lt; nodes.length; i++) {
+            for (j = 0; j &lt; nodes[i].length; j++) {
+                this.execute(nodes[i][j]);
+            }
+        }
+
+    },
+    matrix: this.matrix,
+    sequenceA: this.sequenceA,
+    sequenceB: this.sequenceB,
+    /**
+     *
+     * @returns {window.dna.NodeController}
+     */
+    getController: function () {
+        if (arguments && arguments.length > 0) {
+            if (arguments.length > 1) {
+                return this.controllers[arguments[0] + "-" + arguments[1]];
+            } else {
+                return this.controllers[this.getValuePosController(arguments[0])];
+            }
+        }
+    },
+    /**
+     *
+     * @returns [window.dna.NodeController]
+     */
+    getArrayMaxNodeControllerSemiGlobal: function () {
+
+        var arrayMax = [];
+
+        var nodes = this.matrix.nodes;
+        var i = 0;
+        /**
+         *
+         * @type {window.dna.Node}
+         */
+        var node = null;
+
+
+        for (i = 0; i &lt; nodes.length; i++) {
+            node = nodes[i][nodes[0].length - 1];
+            if (arrayMax.length === 0) {
+                arrayMax.push(node);
+            } else {
+                if (parseInt(arrayMax[0].value) === parseInt(node.value)) {
+                    arrayMax.push(node);
+                } else if (parseInt(arrayMax[0].value) &lt; parseInt(node.value)) {
+                    arrayMax = [];
+                    arrayMax.push(node);
+                }
+            }
+        }
+        for (i = 0; i &lt; nodes[0].length; i++) {
+            node = nodes[nodes.length - 1][i];
+            if (arrayMax.length === 0) {
+                arrayMax.push(node);
+            } else {
+                if (parseInt(arrayMax[0].value) === parseInt(node.value)) {
+                    arrayMax.push(node);
+                } else if (parseInt(arrayMax[0].value) &lt; parseInt(node.value)) {
+                    arrayMax = [];
+                    arrayMax.push(node);
+                }
+            }
+        }
+
+
+        return arrayMax;
+    }
+
+};
+
+/**
+ *
+ * @type {OrganizeNode}
+ */
+//window.dna.OrganizeNode = OrganizeNode;
+
+//})(window, window.dna);</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="AbstractCalculation.html">AbstractCalculation</a></li><li><a href="Calculation.html">Calculation</a></li><li><a href="CalculationFactory.html">CalculationFactory</a></li><li><a href="CalculationGlobal.html">CalculationGlobal</a></li><li><a href="CalculationLocal.html">CalculationLocal</a></li><li><a href="CalculationSemiGlobal.html">CalculationSemiGlobal</a></li><li><a href="InputAlign.html">InputAlign</a></li><li><a href="InputAlignGlobalLocal.html">InputAlignGlobalLocal</a></li><li><a href="InputResultAlign.html">InputResultAlign</a></li><li><a href="Matrix.html">Matrix</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeController.html">NodeController</a></li><li><a href="NodeDetail.html">NodeDetail</a></li><li><a href="OrganizeNode.html">OrganizeNode</a></li><li><a href="OutputAlign.html">OutputAlign</a></li><li><a href="OutputResultAlign.html">OutputResultAlign</a></li></ul><h3>Namespaces</h3><ul><li><a href="dna.html">dna</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Connected">Connected</a></li><li><a href="global.html#MethodSequencing">MethodSequencing</a></li><li><a href="global.html#TypeElement">TypeElement</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat Sep 27 2014 13:59:04 GMT-0300 (BRT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

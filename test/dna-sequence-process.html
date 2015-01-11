@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DNA Sequence Process Test Suite</title>
+  <!-- Load local jQuery. -->
+  <script src="../bower_components/jquery/dist/jquery.js"></script>
+  <!-- Load local QUnit. -->
+  <link rel="stylesheet" href="../bower_components/qunit/qunit/qunit.css" media="screen">
+  <script src="../bower_components/qunit/qunit/qunit.js"></script>
+  <!-- Load local lib and tests. -->
+  <script src="../src/dna-sequence-process.js"></script>
+  <script src="../src/dna/beans/enuns.js"></script>
+  <script src="../src/dna/beans/InputAlign.js"></script>
+  <script src="../src/dna/beans/InputAlignGlobalLocal.js"></script>
+  <script src="../src/dna/beans/InputResultAlign.js"></script>
+  <script src="../src/dna/beans/Matrix.js"></script>
+  <script src="../src/dna/beans/Node.js"></script>
+  <script src="../src/dna/beans/NodeDetail.js"></script>
+  <script src="../src/dna/beans/OutputAlign.js"></script>
+  <script src="../src/dna/beans/OutputResultAlign.js"></script>
+  <script src="../src/dna/util/StringBuffer.js"></script>
+  <script src="../src/dna/formulas/Calculation.js"></script>
+  <script src="../src/dna/formulas/AbstractCalculation.js"></script>
+  <script src="../src/dna/formulas/CalculationFactory.js"></script>
+  <script src="../src/dna/formulas/CalculationGlobal.js"></script>
+  <script src="../src/dna/formulas/CalculationLocal.js"></script>
+  <script src="../src/dna/formulas/CalculationSemiGlobal.js"></script>
+  <script src="../src/dna/formulas/NodeController.js"></script>
+  <script src="../src/dna/formulas/OrganizeNode.js"></script>
+
+  <script src="dna-sequence-process_test.js"></script>
+  <!-- Removing access to jQuery and $. But it'll still be available as _$, if
+       you REALLY want to mess around with jQuery in the console. REMEMBER WE
+       ARE TESTING A PLUGIN HERE, THIS HELPS ENSURE BEST PRACTICES. REALLY. -->
+  <script>window._$ = jQuery.noConflict(true);</script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture">
+    <span>lame test markup</span>
+    <span>normal test markup</span>
+    <span>awesome test markup</span>
+  </div>
+</body>
+</html>

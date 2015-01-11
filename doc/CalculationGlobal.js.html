@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: dna/formulas/CalculationGlobal.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: dna/formulas/CalculationGlobal.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source"><code>/**
+ * @file dna-sequence-process
+ * @namespace dna
+ * @licence GNU GPL v3
+ * @copyright Copyright (c) 2014.
+ * Created by samuel on 17/06/14.
+ */
+
+//(function (window, dna) {
+
+/**
+ *
+ * @type {Connected}
+ */
+
+
+/**
+ * @global
+ * @extends {Calculation}
+ * @param {InputAlign} _inputAlign
+ * @constructor
+ */
+window.dna.CalculationGlobal = function (_inputAlign) {
+
+    var Connected = window.dna.Connected;
+    /**
+     * @description call AbstractCalculation
+     */
+    window.dna.AbstractCalculation.call(this, _inputAlign);
+
+    /**
+     *
+     * @param {NodeController} _nodeController
+     */
+    this.calculationNodeGlobal = function (_nodeController) {
+        this.setGaps();
+        this.saveValue(_nodeController);
+    };
+
+    /**
+     *
+     * @param {NodeController} _nodeController
+     */
+    this.saveValue = function (_nodeController) {
+
+        var nnw = _nodeController.nodeControllerNW;
+        var nn = _nodeController.nodeControllerN;
+        var nw = _nodeController.nodeControllerW;
+
+        if (nnw && nnw.getNode().value === null) {
+            return;
+        }
+
+        if (nn && nn.getNode().value === null) {
+            return;
+        }
+
+        if (nw && nw.getNode().value === null) {
+            return;
+        }
+
+        var connecteds = [];
+
+        try {
+            if (nnw === null && nn === null && nw === null) {
+                _nodeController.getNode().value = 0;
+                return;
+            }
+
+            if (nw === null) {
+                _nodeController.getNode().value = (nn.getNode().value + this.gap);
+                connecteds.push(Connected.N);
+                return;
+            }
+
+            if (nn === null) {
+                _nodeController.getNode().value = (nw.getNode().value + this.gap);
+                connecteds.push(Connected.W);
+                return;
+            }
+
+            var valueN = nn.getNode().value + this.gap;
+            var valueW = nw.getNode().value + this.gap;
+            var valueNW = 0;
+
+            if (_nodeController.valueA === _nodeController.valueB) {
+                valueNW = nnw.getNode().value + this.match;
+            } else {
+//                valueNW = nnw.getNode().value + this.misMatch;
+                valueNW = window.dna.AbstractCalculation.getValueArrayMisMatch.call(this, nnw.getNode().value, _nodeController.valueA, _nodeController.valueB);
+            }
+
+
+
+            if (valueN >= valueNW && valueN >= valueW) {
+                connecteds.push(Connected.N);
+            }
+
+            if (valueW >= valueNW && valueW >= valueN) {
+                connecteds.push(Connected.W);
+            }
+
+            if (valueNW >= valueW && valueNW >= valueN) {
+                connecteds.push(Connected.NW);
+            }
+
+            if (connecteds.contains(Connected.N)) {
+                _nodeController.getNode().value = (valueN);
+                return;
+            }
+
+            if (connecteds.contains(Connected.NW)) {
+                _nodeController.getNode().value = (valueNW);
+                return;
+            }
+
+            if (connecteds.contains(Connected.W)) {
+                _nodeController.getNode().value = (valueW);
+                return;
+            }
+        } finally {
+            _nodeController.getNode().connected = connecteds;
+        }
+    };
+};
+
+
+/**
+ *
+ * @type {AbstractCalculation}
+ */
+window.dna.CalculationGlobal.prototype = new window.dna.AbstractCalculation();
+/**
+ *
+ * @type {CalculationGlobal}
+ */
+window.dna.CalculationGlobal.prototype.constructor = window.dna.CalculationGlobal;
+
+/**
+ * @description calculationNode
+ *
+ */
+window.dna.CalculationGlobal.prototype.calculationNode = function () {
+    window.dna.AbstractCalculation.prototype.calculationNode.call(this);
+
+    var nodes = this.getOutputAlign().matrixs[0].nodes;
+
+    for (var i = 0; i &lt; nodes.length; i++) {
+        for (var j = 0; j &lt; nodes[i].length; j++) {
+            this.calculationNodeGlobal(this.organizeNode.getController(nodes[i][j]));
+        }
+    }
+};
+
+/**
+ * @description findAligns
+ *
+ */
+window.dna.CalculationGlobal.prototype.findAligns = function () {
+    var nodes = this.getOutputAlign().matrixs[0].nodes;
+    var nodeController = this.organizeNode.getController(nodes[nodes.length - 1][nodes[0].length - 1]);
+    this.findAlignsNode(nodeController);
+};
+
+/**
+ *
+ * @type {MethodSequencing}
+ */
+window.dna.CalculationGlobal.prototype.methodSequencing = window.dna.MethodSequencing.GLOBAL;
+
+/**
+ *
+ * @type {CalculationGlobal}
+ */
+//    dna.CalculationGlobal = CalculationGlobal;
+
+//})(window, window.dna);</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="AbstractCalculation.html">AbstractCalculation</a></li><li><a href="Calculation.html">Calculation</a></li><li><a href="CalculationFactory.html">CalculationFactory</a></li><li><a href="CalculationGlobal.html">CalculationGlobal</a></li><li><a href="CalculationLocal.html">CalculationLocal</a></li><li><a href="CalculationSemiGlobal.html">CalculationSemiGlobal</a></li><li><a href="InputAlign.html">InputAlign</a></li><li><a href="InputAlignGlobalLocal.html">InputAlignGlobalLocal</a></li><li><a href="InputResultAlign.html">InputResultAlign</a></li><li><a href="Matrix.html">Matrix</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeController.html">NodeController</a></li><li><a href="NodeDetail.html">NodeDetail</a></li><li><a href="OrganizeNode.html">OrganizeNode</a></li><li><a href="OutputAlign.html">OutputAlign</a></li><li><a href="OutputResultAlign.html">OutputResultAlign</a></li></ul><h3>Namespaces</h3><ul><li><a href="dna.html">dna</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Connected">Connected</a></li><li><a href="global.html#MethodSequencing">MethodSequencing</a></li><li><a href="global.html#TypeElement">TypeElement</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Sat Sep 27 2014 13:59:04 GMT-0300 (BRT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
